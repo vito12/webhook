@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\weebHook;
+use App\WebHook;
+use App\Jobs\SendWebHook;
 use Illuminate\Http\Request;
 
 class WebHookController extends Controller
@@ -12,9 +13,10 @@ class WebHookController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        //se si passa un modello al dispacher lui frà la query per riprenderlo
+        dispatch(new SendWebHook($request->webHook));
     }
 
     /**
@@ -35,7 +37,12 @@ class WebHookController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
+        // $webHook = WebHook::create(['webHook' => $request->webHook]);
+
+        WebHook::create($request->all());
+
+        return response(null, 202);
     }
 
     /**

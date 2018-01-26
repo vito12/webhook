@@ -12,7 +12,8 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return ['weebHook' => 'prova'];
 });
 
-Route::get('/web-hook', 'WebHookController@store');
+Route::post('/web-hook', 'WebHookController@index');
+Route::post('/web-hook/save', 'WebHookController@store');
