@@ -38,11 +38,13 @@ class SendWebHook implements ShouldQueue
 
         $httpClient = new Client();
 
-        $res = $httpClient->request('POST', url('/web-hook/save'), [
-            'form_params' => [
-                'webHook'  => json_encode(['redis' => 'andato'])
+        $res = $httpClient->request('GET', 'http://google.it', 
+            [
+                // 'form_params' => [
+                //     'webHook'  => json_encode(['redis' => 'andato'])
+                // ]
             ]
-        ]);
+        );
 
         $statusCode = $res->getStatusCode();
         Log::info('Status Code' . $statusCode);

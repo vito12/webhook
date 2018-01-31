@@ -1,5 +1,7 @@
 <?php
 
+use App\WebHook;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,7 +14,9 @@
 */
 
 Route::get('/', function () {
-    return ['weebHook' => 'prova'];
+
+    return WebHook::all();
+    
 });
 
 Route::post('/web-hook', 'WebHookController@index');

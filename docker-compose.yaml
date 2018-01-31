@@ -29,9 +29,9 @@ services:
       - ./docker/front/common.include:/etc/nginx/common.include
     volumes_from:
       - gestionecode-php
-      - redis
     depends_on:
       - redis
+
   
   #
   # questi sono i backend PHP
@@ -44,7 +44,7 @@ services:
       - 9000
     environment:
       - HOME=/var/www/html/
-
+    
 
   #
   # questo e' il container con i queue worker
@@ -72,10 +72,10 @@ services:
     ports:
       - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: 
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: gestionecode
       MYSQL_USER: root
-      MYSQL_PASSWORD: pupazzetto
+      MYSQL_PASSWORD: root
     volumes:
       - database_data:/var/lib/mysql
 
