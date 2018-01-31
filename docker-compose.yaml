@@ -1,0 +1,119 @@
+version: '2'
+
+# 
+# La definizione di uno spazio disco, mi consente di fare stop
+# dei container e poi start e non perdere i dati memorizzati in
+# mysql e redis
+#
+volumes:
+  database_data:
+    driver: local
+  redis_data:
+    driver: local
+
+#
+# i container services
+#
+services:
+
+  # questo container e' il front-end web nginx che serve tutto
+  # lo statico (jpg, gif, png, js, css)
+  # e fa reverse delle chiamate PHP
+  front:
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./docker/front/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/front/upstream.conf:/etc/nginx/conf.d/upstream.conf
+      - ./docker/front/common.include:/etc/nginx/common.include
+    volumes_from:
+      - gestionecode-php
+      - redis
+    depends_on:
+      - redis
+  
+  #
+  # questi sono i backend PHP
+  #
+  gestionecode-php:
+    build: ./docker/php-fpm/
+    volumes:
+        - .:/var/www/html
+    expose:
+      - 9000
+    environment:
+      - HOME=/var/www/html/
+
+
+  #
+  # questo e' il container con i queue worker
+  #
+  gestionecode-queue-worker:
+    build: ./docker/php-worker/
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - gestionecode-php
+
+  #
+  # container per i dati: redis e mysql
+  #
+  redis:
+    image: redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - 6379:6379
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_DATABASE: dmm
+      MYSQL_USER: root
+      MYSQL_PASSWORD: pupazzetto
+    volumes:
+      - database_data:/var/lib/mysql
+
+### 
+# Containere di utilita'
+# lanciano dei comandi e si chiudono
+###
+
+  composer_install:
+    extends:
+      service: gestionecode-php
+    entrypoint: ["sh", "./bin/container_scripts/02_composer_install.sh"]
+
+  clear_cache:
+    extends:
+      service: gestionecode-php
+    entrypoint: ["sh", "./bin/container_scripts/03_artisan_clear_cache.sh"]
+    depends_on:
+      - mysql
+
+  migrate:
+    extends:
+      service: gestionecode-php
+    entrypoint: ["sh", "./bin/container_scripts/04_artisan_migrate.sh"]
+    depends_on:
+      - mysql
+
+  queue_restart:
+    extends:
+      service: gestionecode-php
+    entrypoint: ["sh", "./bin/container_scripts/07_artisan_queue_restart.sh"]
+    depends_on:
+      - mysql
+      - gestionecode-queue-worker 
+
+  seed_database:
+    extends:
+      service: gestionecode-php
+    entrypoint: ["sh", "./bin/container_scripts/06_seed_database.sh"]
+    depends_on:
+      - mysql
