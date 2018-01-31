@@ -38,7 +38,7 @@ class SendWebHook implements ShouldQueue
 
         $httpClient = new Client();
 
-        $res = $httpClient->request('POST', 'http://localhost:8000/web-hook/save', [
+        $res = $httpClient->request('POST', url('/web-hook/save'), [
             'form_params' => [
                 'webHook'  => json_encode(['redis' => 'andato'])
             ]

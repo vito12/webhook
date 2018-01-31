@@ -73,7 +73,7 @@ services:
       - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: 
-      MYSQL_DATABASE: dmm
+      MYSQL_DATABASE: gestionecode
       MYSQL_USER: root
       MYSQL_PASSWORD: pupazzetto
     volumes:
